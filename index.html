@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PC PAYBACK // LEDGER</title>
-<link rel="shortcut icon" type="image/png" href="favicon.png">
+<title>IOU LEDGER // PAYBACK TRACKER</title>
+<link rel="icon" type="image/png" sizes="32x32" href="icon_32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icon_16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -35,6 +38,7 @@
   }
   .mono{font-family:'IBM Plex Mono', monospace;}
   .wrap{max-width:640px;margin:0 auto;}
+  .hidden{display:none !important;}
 
   /* header */
   .boot-line{
@@ -44,8 +48,6 @@
     color:var(--amber-dim);
     text-transform:uppercase;
     margin-bottom:6px;
-    opacity:0;
-    animation:fadeIn 0.5s ease forwards;
   }
   h1{
     font-family:'IBM Plex Mono', monospace;
@@ -54,17 +56,35 @@
     letter-spacing:-0.01em;
     margin:0 0 4px;
     color:var(--text);
-    opacity:0;
-    animation:fadeIn 0.5s ease 0.1s forwards;
   }
   .subtitle{
     font-size:13px;
     color:var(--text-dim);
     margin-bottom:28px;
-    opacity:0;
-    animation:fadeIn 0.5s ease 0.2s forwards;
   }
-  @keyframes fadeIn{to{opacity:1;}}
+
+  /* top account bar */
+  .acct-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--hair);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--text-dim);
+  }
+  .acct-bar b{color:var(--text);font-weight:600;}
+  .link-btn{
+    background:none;border:none;color:var(--text-dim);
+    font-family:'IBM Plex Mono', monospace;font-size:11px;
+    letter-spacing:0.08em;text-transform:uppercase;
+    cursor:pointer;text-decoration:underline;text-underline-offset:2px;
+    padding:2px;
+  }
+  .link-btn:hover{color:var(--amber);}
+  .back-row{margin-bottom:16px;}
 
   /* panel */
   .panel{
@@ -99,62 +119,34 @@
   }
   .panel-label .edit-btn:hover{color:var(--amber);}
 
-  /* item / setup */
-  .item-name{
-    font-size:18px;
-    font-weight:600;
-    margin-bottom:2px;
-  }
-  .item-cost{
-    font-family:'IBM Plex Mono', monospace;
-    color:var(--text-dim);
-    font-size:13px;
-  }
+  .item-name{font-size:18px;font-weight:600;margin-bottom:2px;}
+  .item-cost{font-family:'IBM Plex Mono', monospace;color:var(--text-dim);font-size:13px;}
 
   /* progress */
-  .progress-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-    margin-bottom:10px;
-  }
+  .progress-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
   .progress-pct{
     font-family:'IBM Plex Mono', monospace;
-    font-size:34px;
-    font-weight:700;
-    color:var(--amber);
+    font-size:34px;font-weight:700;color:var(--amber);
     text-shadow:0 0 18px var(--amber-glow);
   }
   .progress-pct.done{color:var(--green);text-shadow:0 0 18px rgba(127,216,88,0.4);}
   .progress-status{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:11px;
-    letter-spacing:0.1em;
-    text-transform:uppercase;
-    color:var(--text-dim);
+    font-family:'IBM Plex Mono', monospace;font-size:11px;
+    letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);
   }
   .bar-track{
-    width:100%;
-    height:14px;
-    background:var(--panel-2);
-    border:1px solid var(--hair);
-    border-radius:2px;
-    overflow:hidden;
-    position:relative;
+    width:100%;height:14px;background:var(--panel-2);
+    border:1px solid var(--hair);border-radius:2px;overflow:hidden;position:relative;
   }
   .bar-fill{
     height:100%;
     background:repeating-linear-gradient(90deg, var(--amber) 0px, var(--amber) 6px, #E09A3E 6px, #E09A3E 8px);
-    width:0%;
-    transition:width 0.8s cubic-bezier(.4,0,.2,1);
+    width:0%;transition:width 0.8s cubic-bezier(.4,0,.2,1);
   }
   .bar-fill.done{background:repeating-linear-gradient(90deg, var(--green) 0px, var(--green) 6px, #6BC24A 6px, #6BC24A 8px);}
   .stats-row{
-    display:flex;
-    justify-content:space-between;
-    margin-top:14px;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
+    display:flex;justify-content:space-between;margin-top:14px;
+    font-family:'IBM Plex Mono', monospace;font-size:12px;
   }
   .stat{color:var(--text-dim);}
   .stat b{color:var(--text);font-weight:600;}
@@ -162,25 +154,13 @@
   /* form */
   .field{margin-bottom:14px;}
   label{
-    display:block;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:10px;
-    letter-spacing:0.12em;
-    text-transform:uppercase;
-    color:var(--text-dim);
-    margin-bottom:6px;
+    display:block;font-family:'IBM Plex Mono', monospace;font-size:10px;
+    letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px;
   }
-  input[type=text], input[type=number], input[type=date]{
-    width:100%;
-    background:var(--panel-2);
-    border:1px solid var(--hair);
-    border-radius:2px;
-    color:var(--text);
-    padding:10px 12px;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:14px;
-    outline:none;
-    transition:border-color 0.15s;
+  input[type=text], input[type=number], input[type=date], input[type=email], input[type=password]{
+    width:100%;background:var(--panel-2);border:1px solid var(--hair);border-radius:2px;
+    color:var(--text);padding:10px 12px;font-family:'IBM Plex Mono', monospace;
+    font-size:14px;outline:none;transition:border-color 0.15s;
   }
   input::placeholder{color:#5A5142;}
   input:focus{border-color:var(--amber-dim);}
@@ -188,40 +168,57 @@
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 
   button.primary{
-    width:100%;
-    background:var(--amber);
-    color:#1A1207;
-    border:none;
-    border-radius:2px;
-    padding:12px;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:13px;
-    font-weight:700;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-    cursor:pointer;
+    width:100%;background:var(--amber);color:#1A1207;border:none;border-radius:2px;
+    padding:12px;font-family:'IBM Plex Mono', monospace;font-size:13px;font-weight:700;
+    letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;
     transition:transform 0.1s, background 0.15s;
   }
   button.primary:hover{background:#FFC169;}
   button.primary:active{transform:scale(0.98);}
-  button.primary:disabled{background:var(--hair);color:var(--text-dim);cursor:not-allowed;}
-
-  /* log */
-  .log-entry{
-    display:flex;
-    gap:12px;
-    padding:12px 0;
-    border-bottom:1px solid var(--hair);
-    align-items:flex-start;
+  button.primary.secondary{
+    background:transparent;border:1px solid var(--amber-dim);color:var(--amber);
   }
-  .log-entry:last-child{border-bottom:none;}
-  .log-marker{
-    font-family:'IBM Plex Mono', monospace;
-    color:var(--green);
-    font-size:13px;
-    margin-top:2px;
+  button.primary.secondary:hover{background:rgba(255,179,71,0.08);}
+
+  .error-msg{
+    font-family:'IBM Plex Mono', monospace;font-size:11px;color:var(--red);
+    margin:-6px 0 12px;min-height:14px;
+  }
+
+  .auth-toggle{
+    text-align:center;font-family:'IBM Plex Mono', monospace;font-size:12px;
+    color:var(--text-dim);margin-top:14px;
+  }
+  .auth-toggle button{
+    background:none;border:none;color:var(--amber);cursor:pointer;
+    font-family:'IBM Plex Mono', monospace;font-size:12px;text-decoration:underline;
+    text-underline-offset:2px;padding:0;
+  }
+
+  /* tracker cards (dashboard) */
+  .tracker-card{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:14px 4px;border-bottom:1px solid var(--hair);cursor:pointer;
+  }
+  .tracker-card:last-child{border-bottom:none;}
+  .tracker-card:hover .item-name{color:var(--amber);}
+  .tracker-meta{flex:1;min-width:0;}
+  .tracker-pct{
+    font-family:'IBM Plex Mono', monospace;font-size:18px;font-weight:700;color:var(--amber);
     flex-shrink:0;
   }
+  .tracker-pct.done{color:var(--green);}
+  .tracker-del{
+    background:none;border:none;color:var(--text-dim);cursor:pointer;
+    font-size:16px;line-height:1;padding:2px 6px;opacity:0.5;
+    transition:opacity 0.15s, color 0.15s;flex-shrink:0;
+  }
+  .tracker-del:hover{opacity:1;color:var(--red);}
+
+  /* log */
+  .log-entry{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--hair);align-items:flex-start;}
+  .log-entry:last-child{border-bottom:none;}
+  .log-marker{font-family:'IBM Plex Mono', monospace;color:var(--green);font-size:13px;margin-top:2px;flex-shrink:0;}
   .log-body{flex:1;min-width:0;}
   .log-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;}
   .log-amount{font-family:'IBM Plex Mono', monospace;font-weight:600;font-size:15px;color:var(--text);}
@@ -234,20 +231,13 @@
   }
   .log-del:hover{opacity:1;color:var(--red);}
   .empty-state{
-    text-align:center;
-    padding:24px 12px;
-    color:var(--text-dim);
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
+    text-align:center;padding:24px 12px;color:var(--text-dim);
+    font-family:'IBM Plex Mono', monospace;font-size:12px;
   }
 
   .footer-note{
-    text-align:center;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:10px;
-    letter-spacing:0.08em;
-    color:var(--hair);
-    margin-top:24px;
+    text-align:center;font-family:'IBM Plex Mono', monospace;font-size:10px;
+    letter-spacing:0.08em;color:var(--hair);margin-top:24px;
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -261,71 +251,121 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="boot-line">SELF-LOAN TRACKER v1.0</div>
-  <h1 class="mono">PC PAYBACK // LEDGER</h1>
-  <div class="subtitle">Tracking what you owe yourself for the machine.</div>
 
-  <!-- SETUP / ITEM PANEL -->
-  <div class="panel" id="setupPanel">
-    <div class="panel-label">
-      <span>THE PURCHASE</span>
-      <button class="edit-btn" id="editSetupBtn" style="display:none;">EDIT</button>
-    </div>
-    <div id="setupDisplay" style="display:none;">
-      <div class="item-name mono" id="itemNameDisplay"></div>
-      <div class="item-cost" id="itemCostDisplay"></div>
-    </div>
-    <div id="setupForm">
-      <div class="field">
-        <label for="itemName">What did you buy</label>
-        <input type="text" id="itemName" placeholder="e.g. New PC build">
-      </div>
-      <div class="field">
-        <label for="itemCost">Total cost ($)</label>
-        <input type="number" id="itemCost" placeholder="1500.00" step="0.01" min="0">
-      </div>
-      <button class="primary" id="saveSetupBtn">Start tracking</button>
-    </div>
+  <div class="boot-line">SELF &amp; OTHERS REPAYMENT SYSTEM v2.0</div>
+  <h1 class="mono">IOU LEDGER</h1>
+  <div class="subtitle">Track what you owe yourself — or anyone else — until it's paid off.</div>
+
+  <!-- ACCOUNT BAR (shown once logged in) -->
+  <div class="acct-bar hidden" id="acctBar">
+    <div>SIGNED IN AS <b class="mono" id="acctEmail"></b></div>
+    <button class="link-btn" id="logoutBtn">LOG OUT</button>
   </div>
 
-  <!-- PROGRESS PANEL -->
-  <div class="panel" id="progressPanel" style="display:none;">
-    <div class="panel-label"><span>PROGRESS</span></div>
-    <div class="progress-row">
-      <div class="progress-pct mono" id="pctDisplay">0%</div>
-      <div class="progress-status mono" id="statusDisplay">IN PROGRESS</div>
-    </div>
-    <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
-    <div class="stats-row">
-      <div class="stat">PAID BACK <b class="mono" id="paidStat">$0.00</b></div>
-      <div class="stat">REMAINING <b class="mono" id="remainingStat">$0.00</b></div>
-    </div>
-  </div>
-
-  <!-- ADD ENTRY PANEL -->
-  <div class="panel" id="entryPanel" style="display:none;">
-    <div class="panel-label"><span>LOG A PAYMENT</span></div>
-    <div class="two-col">
-      <div class="field">
-        <label for="entryAmount">Amount ($)</label>
-        <input type="number" id="entryAmount" placeholder="50.00" step="0.01" min="0">
-      </div>
-      <div class="field">
-        <label for="entryDate">Date</label>
-        <input type="date" id="entryDate">
-      </div>
+  <!-- AUTH PANEL -->
+  <div class="panel" id="authPanel">
+    <div class="panel-label"><span id="authTitle">LOG IN</span></div>
+    <div class="field">
+      <label for="authEmail">Email</label>
+      <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="username">
     </div>
     <div class="field">
-      <label for="entryNote">Notes (optional)</label>
-      <input type="text" id="entryNote" placeholder="e.g. paid myself back from freelance check">
+      <label for="authPassword">Password</label>
+      <input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password">
     </div>
-    <button class="primary" id="addEntryBtn">Log payment</button>
+    <div class="error-msg" id="authError"></div>
+    <button class="primary" id="authSubmitBtn">Log in</button>
+    <div class="auth-toggle" id="authToggleWrap">
+      No account yet? <button id="authToggleBtn">Create one</button>
+    </div>
   </div>
 
-  <!-- LOG PANEL -->
-  <div class="panel" id="logPanel" style="display:none;">
-    <div class="panel-label"><span>PAYMENT LOG</span></div>
-    <div id="logList"></div>
+  <!-- DASHBOARD: LIST OF TRACKERS -->
+  <div id="dashboardView" class="hidden">
+    <div class="panel">
+      <div class="panel-label"><span>NEW TRACKER</span></div>
+      <div class="field">
+        <label for="newTrackerName">What's being paid back</label>
+        <input type="text" id="newTrackerName" placeholder="e.g. New PC build, Loan to Sam">
+      </div>
+      <div class="field">
+        <label for="newTrackerCost">Total amount owed ($)</label>
+        <input type="number" id="newTrackerCost" placeholder="1500.00" step="0.01" min="0">
+      </div>
+      <div class="error-msg" id="newTrackerError"></div>
+      <button class="primary" id="createTrackerBtn">Create tracker</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label"><span>YOUR TRACKERS</span></div>
+      <div id="trackerList"></div>
+    </div>
+  </div>
+
+  <!-- TRACKER DETAIL VIEW -->
+  <div id="trackerView" class="hidden">
+    <div class="back-row">
+      <button class="link-btn" id="backToDashboardBtn">&larr; ALL TRACKERS</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">
+        <span>THE DEBT</span>
+        <button class="edit-btn" id="editTrackerBtn">EDIT</button>
+      </div>
+      <div id="trackerDisplay">
+        <div class="item-name mono" id="trackerNameDisplay"></div>
+        <div class="item-cost" id="trackerCostDisplay"></div>
+      </div>
+      <div id="trackerEditForm" class="hidden" style="margin-top:14px;">
+        <div class="field">
+          <label for="editName">What's being paid back</label>
+          <input type="text" id="editName">
+        </div>
+        <div class="field">
+          <label for="editCost">Total amount owed ($)</label>
+          <input type="number" id="editCost" step="0.01" min="0">
+        </div>
+        <button class="primary" id="saveEditBtn">Save changes</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label"><span>PROGRESS</span></div>
+      <div class="progress-row">
+        <div class="progress-pct mono" id="pctDisplay">0%</div>
+        <div class="progress-status mono" id="statusDisplay">IN PROGRESS</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+      <div class="stats-row">
+        <div class="stat">PAID BACK <b class="mono" id="paidStat">$0.00</b></div>
+        <div class="stat">REMAINING <b class="mono" id="remainingStat">$0.00</b></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label"><span>LOG A PAYMENT</span></div>
+      <div class="two-col">
+        <div class="field">
+          <label for="entryAmount">Amount ($)</label>
+          <input type="number" id="entryAmount" placeholder="50.00" step="0.01" min="0">
+        </div>
+        <div class="field">
+          <label for="entryDate">Date</label>
+          <input type="date" id="entryDate">
+        </div>
+      </div>
+      <div class="field">
+        <label for="entryNote">Notes (optional)</label>
+        <input type="text" id="entryNote" placeholder="e.g. paid myself back from freelance check">
+      </div>
+      <button class="primary" id="addEntryBtn">Log payment</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label"><span>PAYMENT LOG</span></div>
+      <div id="logList"></div>
+    </div>
   </div>
 
   <div class="footer-note">STORED LOCALLY IN THIS ARTIFACT — NOT SYNCED ELSEWHERE</div>
@@ -333,95 +373,251 @@
 
 <script>
 (function(){
-  const SETUP_KEY = 'pc-ledger-setup';
-  const ENTRIES_KEY = 'pc-ledger-entries';
-
-  let setup = null; // {name, cost}
-  let entries = []; // [{id, amount, note, date}]
-
   const $ = (id) => document.getElementById(id);
 
+  // ---------- state ----------
+  let mode = 'login'; // 'login' | 'signup'
+  let currentEmail = null;
+  let trackers = [];
+  let currentTrackerId = null;
+
+  // ---------- helpers ----------
   function fmt(n){
     return '$' + Number(n).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
   }
-
   function todayStr(){
     const d = new Date();
-    const m = String(d.getMonth()+1).padStart(2,'0');
-    const day = String(d.getDate()).padStart(2,'0');
-    return `${d.getFullYear()}-${m}-${day}`;
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
-
   function prettyDate(iso){
     if(!iso) return '';
     const [y,m,d] = iso.split('-');
     const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
     return `${months[parseInt(m,10)-1]} ${parseInt(d,10)}, ${y}`;
   }
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+  function normEmail(e){ return e.trim().toLowerCase(); }
 
-  async function loadState(){
+  function toHex(buffer){
+    return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  async function hashPassword(password, saltHex){
+    const enc = new TextEncoder();
+    const data = enc.encode(saltHex + ':' + password);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return toHex(digest);
+  }
+  function randomSalt(){
+    const arr = new Uint8Array(16);
+    crypto.getRandomValues(arr);
+    return toHex(arr.buffer);
+  }
+
+  // ---------- storage ----------
+  async function getAccount(email){
     try{
-      const s = await window.storage.get(SETUP_KEY, false);
-      setup = s ? JSON.parse(s.value) : null;
-    }catch(e){ setup = null; }
+      const r = await window.storage.get('account:' + email, false);
+      return r ? JSON.parse(r.value) : null;
+    }catch(e){ return null; }
+  }
+  async function saveAccount(acct){
+    await window.storage.set('account:' + acct.email, JSON.stringify(acct), false);
+  }
+  async function getTrackers(email){
     try{
-      const e = await window.storage.get(ENTRIES_KEY, false);
-      entries = e ? JSON.parse(e.value) : [];
-    }catch(e){ entries = []; }
-    render();
+      const r = await window.storage.get('trackers:' + email, false);
+      return r ? JSON.parse(r.value) : [];
+    }catch(e){ return []; }
+  }
+  async function saveTrackers(email, list){
+    await window.storage.set('trackers:' + email, JSON.stringify(list), false);
+  }
+  async function getSession(){
+    try{
+      const r = await window.storage.get('session', false);
+      return r ? JSON.parse(r.value).email : null;
+    }catch(e){ return null; }
+  }
+  async function setSession(email){
+    await window.storage.set('session', JSON.stringify({email}), false);
+  }
+  async function clearSession(){
+    try{ await window.storage.delete('session', false); }catch(e){}
   }
 
-  async function saveSetup(){
-    try{ await window.storage.set(SETUP_KEY, JSON.stringify(setup), false); }
-    catch(e){ console.error('Failed to save setup', e); }
+  // ---------- view switching ----------
+  function showAuth(){
+    $('acctBar').classList.add('hidden');
+    $('authPanel').classList.remove('hidden');
+    $('dashboardView').classList.add('hidden');
+    $('trackerView').classList.add('hidden');
+  }
+  function showDashboard(){
+    $('acctBar').classList.remove('hidden');
+    $('acctEmail').textContent = currentEmail;
+    $('authPanel').classList.add('hidden');
+    $('dashboardView').classList.remove('hidden');
+    $('trackerView').classList.add('hidden');
+    renderTrackerList();
+  }
+  function showTracker(id){
+    currentTrackerId = id;
+    $('acctBar').classList.remove('hidden');
+    $('authPanel').classList.add('hidden');
+    $('dashboardView').classList.add('hidden');
+    $('trackerView').classList.remove('hidden');
+    $('trackerEditForm').classList.add('hidden');
+    $('trackerDisplay').classList.remove('hidden');
+    $('entryDate').value = todayStr();
+    renderTracker();
   }
 
-  async function saveEntries(){
-    try{ await window.storage.set(ENTRIES_KEY, JSON.stringify(entries), false); }
-    catch(e){ console.error('Failed to save entries', e); }
-  }
+  // ---------- auth ----------
+  function setAuthError(msg){ $('authError').textContent = msg || ''; }
 
-  function render(){
-    if(setup && setup.name && setup.cost > 0){
-      $('setupForm').style.display = 'none';
-      $('setupDisplay').style.display = 'block';
-      $('editSetupBtn').style.display = 'inline';
-      $('itemNameDisplay').textContent = setup.name;
-      $('itemCostDisplay').textContent = 'Total owed to yourself: ' + fmt(setup.cost);
-      $('progressPanel').style.display = 'block';
-      $('entryPanel').style.display = 'block';
-      $('logPanel').style.display = 'block';
+  $('authToggleBtn').addEventListener('click', () => {
+    mode = mode === 'login' ? 'signup' : 'login';
+    $('authTitle').textContent = mode === 'login' ? 'LOG IN' : 'CREATE ACCOUNT';
+    $('authSubmitBtn').textContent = mode === 'login' ? 'Log in' : 'Create account';
+    $('authToggleWrap').innerHTML = mode === 'login'
+      ? `No account yet? <button id="authToggleBtn2">Create one</button>`
+      : `Already have an account? <button id="authToggleBtn2">Log in</button>`;
+    document.getElementById('authToggleBtn2').addEventListener('click', () => $('authToggleBtn').click());
+    setAuthError('');
+  });
+
+  $('authSubmitBtn').addEventListener('click', async () => {
+    setAuthError('');
+    const email = normEmail($('authEmail').value);
+    const password = $('authPassword').value;
+    if(!email || !email.includes('@')){ setAuthError('Enter a valid email.'); return; }
+    if(!password || password.length < 4){ setAuthError('Password must be at least 4 characters.'); return; }
+
+    const existing = await getAccount(email);
+    if(mode === 'signup'){
+      if(existing){ setAuthError('An account with that email already exists.'); return; }
+      const salt = randomSalt();
+      const hash = await hashPassword(password, salt);
+      await saveAccount({email, salt, hash});
+      currentEmail = email;
+      trackers = [];
+      await setSession(email);
+      showDashboard();
     } else {
-      $('setupForm').style.display = 'block';
-      $('setupDisplay').style.display = 'none';
-      $('editSetupBtn').style.display = 'none';
-      $('progressPanel').style.display = 'none';
-      $('entryPanel').style.display = 'none';
-      $('logPanel').style.display = 'none';
+      if(!existing){ setAuthError('No account found with that email.'); return; }
+      const hash = await hashPassword(password, existing.salt);
+      if(hash !== existing.hash){ setAuthError('Incorrect password.'); return; }
+      currentEmail = email;
+      trackers = await getTrackers(email);
+      showDashboard();
+    }
+    $('authEmail').value = '';
+    $('authPassword').value = '';
+  });
+
+  $('logoutBtn').addEventListener('click', async () => {
+    await clearSession();
+    currentEmail = null;
+    trackers = [];
+    currentTrackerId = null;
+    showAuth();
+  });
+
+  // ---------- dashboard ----------
+  function trackerStats(t){
+    const paid = t.entries.reduce((s,e) => s + Number(e.amount), 0);
+    const remaining = Math.max(t.cost - paid, 0);
+    const pct = t.cost > 0 ? Math.min(Math.round((paid / t.cost) * 100), 100) : 0;
+    return {paid, remaining, pct, isDone: t.cost > 0 && paid >= t.cost};
+  }
+
+  function renderTrackerList(){
+    const list = $('trackerList');
+    if(trackers.length === 0){
+      list.innerHTML = '<div class="empty-state">No trackers yet. Create one above to get started.</div>';
       return;
     }
+    list.innerHTML = trackers.map(t => {
+      const s = trackerStats(t);
+      return `
+        <div class="tracker-card" data-open="${t.id}">
+          <div class="tracker-meta">
+            <div class="item-name mono">${escapeHtml(t.name)}</div>
+            <div class="item-cost">${fmt(s.paid)} of ${fmt(t.cost)} paid back</div>
+          </div>
+          <div class="tracker-pct mono${s.isDone ? ' done' : ''}">${s.pct}%</div>
+          <button class="tracker-del" data-del="${t.id}" aria-label="Delete tracker">&times;</button>
+        </div>
+      `;
+    }).join('');
+  }
 
-    const paid = entries.reduce((sum, e) => sum + Number(e.amount), 0);
-    const remaining = Math.max(setup.cost - paid, 0);
-    const pct = Math.min(Math.round((paid / setup.cost) * 100), 100);
-    const isDone = paid >= setup.cost;
+  $('trackerList').addEventListener('click', async (ev) => {
+    const delBtn = ev.target.closest('[data-del]');
+    if(delBtn){
+      const id = Number(delBtn.getAttribute('data-del'));
+      trackers = trackers.filter(t => t.id !== id);
+      await saveTrackers(currentEmail, trackers);
+      renderTrackerList();
+      return;
+    }
+    const openCard = ev.target.closest('[data-open]');
+    if(openCard){
+      showTracker(Number(openCard.getAttribute('data-open')));
+    }
+  });
 
-    $('pctDisplay').textContent = pct + '%';
-    $('pctDisplay').className = 'progress-pct mono' + (isDone ? ' done' : '');
-    $('statusDisplay').textContent = isDone ? 'PAID IN FULL' : 'IN PROGRESS';
-    $('barFill').style.width = pct + '%';
-    $('barFill').className = 'bar-fill' + (isDone ? ' done' : '');
-    $('paidStat').textContent = fmt(paid);
-    $('remainingStat').textContent = fmt(remaining);
+  $('createTrackerBtn').addEventListener('click', async () => {
+    const name = $('newTrackerName').value.trim();
+    const cost = parseFloat($('newTrackerCost').value);
+    if(!name || !cost || cost <= 0){
+      $('newTrackerError').textContent = 'Enter a name and a total amount greater than $0.';
+      return;
+    }
+    $('newTrackerError').textContent = '';
+    const tracker = {id: Date.now(), name, cost, entries: []};
+    trackers.push(tracker);
+    await saveTrackers(currentEmail, trackers);
+    $('newTrackerName').value = '';
+    $('newTrackerCost').value = '';
+    renderTrackerList();
+    showTracker(tracker.id);
+  });
 
-    // log
+  $('backToDashboardBtn').addEventListener('click', () => showDashboard());
+
+  // ---------- tracker detail ----------
+  function currentTracker(){
+    return trackers.find(t => t.id === currentTrackerId);
+  }
+
+  function renderTracker(){
+    const t = currentTracker();
+    if(!t){ showDashboard(); return; }
+    const s = trackerStats(t);
+
+    $('trackerNameDisplay').textContent = t.name;
+    $('trackerCostDisplay').textContent = 'Total owed: ' + fmt(t.cost);
+
+    $('pctDisplay').textContent = s.pct + '%';
+    $('pctDisplay').className = 'progress-pct mono' + (s.isDone ? ' done' : '');
+    $('statusDisplay').textContent = s.isDone ? 'PAID IN FULL' : 'IN PROGRESS';
+    $('barFill').style.width = s.pct + '%';
+    $('barFill').className = 'bar-fill' + (s.isDone ? ' done' : '');
+    $('paidStat').textContent = fmt(s.paid);
+    $('remainingStat').textContent = fmt(s.remaining);
+
     const logList = $('logList');
-    if(entries.length === 0){
+    if(t.entries.length === 0){
       logList.innerHTML = '<div class="empty-state">No payments logged yet. Add your first one above.</div>';
     } else {
-      const sorted = [...entries].sort((a,b) => (b.date || '').localeCompare(a.date || '') || b.id - a.id);
+      const sorted = [...t.entries].sort((a,b) => (b.date || '').localeCompare(a.date || '') || b.id - a.id);
       logList.innerHTML = sorted.map(e => `
-        <div class="log-entry" data-id="${e.id}">
+        <div class="log-entry">
           <div class="log-marker">$</div>
           <div class="log-body">
             <div class="log-top">
@@ -436,33 +632,29 @@
     }
   }
 
-  function escapeHtml(str){
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
-  $('saveSetupBtn').addEventListener('click', async () => {
-    const name = $('itemName').value.trim();
-    const cost = parseFloat($('itemCost').value);
-    if(!name || !cost || cost <= 0){
-      $('itemName').style.borderColor = !name ? 'var(--red)' : 'var(--hair)';
-      $('itemCost').style.borderColor = (!cost || cost<=0) ? 'var(--red)' : 'var(--hair)';
-      return;
-    }
-    setup = {name, cost};
-    await saveSetup();
-    render();
+  $('editTrackerBtn').addEventListener('click', () => {
+    const t = currentTracker();
+    $('editName').value = t.name;
+    $('editCost').value = t.cost;
+    $('trackerDisplay').classList.add('hidden');
+    $('trackerEditForm').classList.remove('hidden');
   });
 
-  $('editSetupBtn').addEventListener('click', () => {
-    $('itemName').value = setup.name;
-    $('itemCost').value = setup.cost;
-    $('setupForm').style.display = 'block';
-    $('setupDisplay').style.display = 'none';
+  $('saveEditBtn').addEventListener('click', async () => {
+    const t = currentTracker();
+    const name = $('editName').value.trim();
+    const cost = parseFloat($('editCost').value);
+    if(!name || !cost || cost <= 0) return;
+    t.name = name;
+    t.cost = cost;
+    await saveTrackers(currentEmail, trackers);
+    $('trackerEditForm').classList.add('hidden');
+    $('trackerDisplay').classList.remove('hidden');
+    renderTracker();
   });
 
   $('addEntryBtn').addEventListener('click', async () => {
+    const t = currentTracker();
     const amount = parseFloat($('entryAmount').value);
     const note = $('entryNote').value.trim();
     const date = $('entryDate').value || todayStr();
@@ -471,26 +663,38 @@
       return;
     }
     $('entryAmount').style.borderColor = 'var(--hair)';
-    entries.push({id: Date.now(), amount, note, date});
-    await saveEntries();
+    t.entries.push({id: Date.now(), amount, note, date});
+    await saveTrackers(currentEmail, trackers);
     $('entryAmount').value = '';
     $('entryNote').value = '';
-    $('entryDate').value = '';
-    render();
+    $('entryDate').value = todayStr();
+    renderTracker();
   });
 
   $('logList').addEventListener('click', async (ev) => {
     const btn = ev.target.closest('[data-del]');
     if(!btn) return;
+    const t = currentTracker();
     const id = Number(btn.getAttribute('data-del'));
-    entries = entries.filter(e => e.id !== id);
-    await saveEntries();
-    render();
+    t.entries = t.entries.filter(e => e.id !== id);
+    await saveTrackers(currentEmail, trackers);
+    renderTracker();
   });
 
-  $('entryDate').value = todayStr();
-
-  loadState();
+  // ---------- init ----------
+  (async function init(){
+    const sessionEmail = await getSession();
+    if(sessionEmail){
+      const acct = await getAccount(sessionEmail);
+      if(acct){
+        currentEmail = sessionEmail;
+        trackers = await getTrackers(sessionEmail);
+        showDashboard();
+        return;
+      }
+    }
+    showAuth();
+  })();
 })();
 </script>
 </body>
