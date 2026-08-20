@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PC PAYBACK // LEDGER</title>
+<link rel="shortcut icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0C0A08;
+    --panel:#161209;
+    --panel-2:#1D1810;
+    --hair:#3A2F1C;
+    --text:#EDE6D6;
+    --text-dim:#9C9282;
+    --amber:#FFB347;
+    --amber-dim:#8A5A2B;
+    --amber-glow:rgba(255,179,71,0.35);
+    --green:#7FD858;
+    --red:#E8604C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top, rgba(255,179,71,0.05), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+    padding:32px 16px 80px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .wrap{max-width:640px;margin:0 auto;}
+
+  /* header */
+  .boot-line{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    color:var(--amber-dim);
+    text-transform:uppercase;
+    margin-bottom:6px;
+    opacity:0;
+    animation:fadeIn 0.5s ease forwards;
+  }
+  h1{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:26px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin:0 0 4px;
+    color:var(--text);
+    opacity:0;
+    animation:fadeIn 0.5s ease 0.1s forwards;
+  }
+  .subtitle{
+    font-size:13px;
+    color:var(--text-dim);
+    margin-bottom:28px;
+    opacity:0;
+    animation:fadeIn 0.5s ease 0.2s forwards;
+  }
+  @keyframes fadeIn{to{opacity:1;}}
+
+  /* panel */
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--hair);
+    border-radius:3px;
+    padding:20px;
+    margin-bottom:16px;
+  }
+  .panel-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--amber-dim);
+    margin-bottom:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .panel-label .edit-btn{
+    color:var(--text-dim);
+    background:none;
+    border:none;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.1em;
+    cursor:pointer;
+    text-decoration:underline;
+    text-underline-offset:2px;
+    padding:2px;
+  }
+  .panel-label .edit-btn:hover{color:var(--amber);}
+
+  /* item / setup */
+  .item-name{
+    font-size:18px;
+    font-weight:600;
+    margin-bottom:2px;
+  }
+  .item-cost{
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--text-dim);
+    font-size:13px;
+  }
+
+  /* progress */
+  .progress-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:10px;
+  }
+  .progress-pct{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:34px;
+    font-weight:700;
+    color:var(--amber);
+    text-shadow:0 0 18px var(--amber-glow);
+  }
+  .progress-pct.done{color:var(--green);text-shadow:0 0 18px rgba(127,216,88,0.4);}
+  .progress-status{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+  }
+  .bar-track{
+    width:100%;
+    height:14px;
+    background:var(--panel-2);
+    border:1px solid var(--hair);
+    border-radius:2px;
+    overflow:hidden;
+    position:relative;
+  }
+  .bar-fill{
+    height:100%;
+    background:repeating-linear-gradient(90deg, var(--amber) 0px, var(--amber) 6px, #E09A3E 6px, #E09A3E 8px);
+    width:0%;
+    transition:width 0.8s cubic-bezier(.4,0,.2,1);
+  }
+  .bar-fill.done{background:repeating-linear-gradient(90deg, var(--green) 0px, var(--green) 6px, #6BC24A 6px, #6BC24A 8px);}
+  .stats-row{
+    display:flex;
+    justify-content:space-between;
+    margin-top:14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+  }
+  .stat{color:var(--text-dim);}
+  .stat b{color:var(--text);font-weight:600;}
+
+  /* form */
+  .field{margin-bottom:14px;}
+  label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin-bottom:6px;
+  }
+  input[type=text], input[type=number], input[type=date]{
+    width:100%;
+    background:var(--panel-2);
+    border:1px solid var(--hair);
+    border-radius:2px;
+    color:var(--text);
+    padding:10px 12px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    outline:none;
+    transition:border-color 0.15s;
+  }
+  input::placeholder{color:#5A5142;}
+  input:focus{border-color:var(--amber-dim);}
+  input:focus-visible, button:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  button.primary{
+    width:100%;
+    background:var(--amber);
+    color:#1A1207;
+    border:none;
+    border-radius:2px;
+    padding:12px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:transform 0.1s, background 0.15s;
+  }
+  button.primary:hover{background:#FFC169;}
+  button.primary:active{transform:scale(0.98);}
+  button.primary:disabled{background:var(--hair);color:var(--text-dim);cursor:not-allowed;}
+
+  /* log */
+  .log-entry{
+    display:flex;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px solid var(--hair);
+    align-items:flex-start;
+  }
+  .log-entry:last-child{border-bottom:none;}
+  .log-marker{
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--green);
+    font-size:13px;
+    margin-top:2px;
+    flex-shrink:0;
+  }
+  .log-body{flex:1;min-width:0;}
+  .log-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;}
+  .log-amount{font-family:'IBM Plex Mono', monospace;font-weight:600;font-size:15px;color:var(--text);}
+  .log-date{font-family:'IBM Plex Mono', monospace;font-size:11px;color:var(--text-dim);white-space:nowrap;}
+  .log-note{font-size:13px;color:var(--text-dim);margin-top:3px;line-height:1.4;word-wrap:break-word;}
+  .log-del{
+    background:none;border:none;color:var(--text-dim);cursor:pointer;
+    font-size:16px;line-height:1;padding:2px 6px;flex-shrink:0;
+    opacity:0.5;transition:opacity 0.15s, color 0.15s;
+  }
+  .log-del:hover{opacity:1;color:var(--red);}
+  .empty-state{
+    text-align:center;
+    padding:24px 12px;
+    color:var(--text-dim);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+  }
+
+  .footer-note{
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    color:var(--hair);
+    margin-top:24px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+  @media (max-width:420px){
+    .progress-pct{font-size:28px;}
+    .two-col{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="boot-line">SELF-LOAN TRACKER v1.0</div>
+  <h1 class="mono">PC PAYBACK // LEDGER</h1>
+  <div class="subtitle">Tracking what you owe yourself for the machine.</div>
+
+  <!-- SETUP / ITEM PANEL -->
+  <div class="panel" id="setupPanel">
+    <div class="panel-label">
+      <span>THE PURCHASE</span>
+      <button class="edit-btn" id="editSetupBtn" style="display:none;">EDIT</button>
+    </div>
+    <div id="setupDisplay" style="display:none;">
+      <div class="item-name mono" id="itemNameDisplay"></div>
+      <div class="item-cost" id="itemCostDisplay"></div>
+    </div>
+    <div id="setupForm">
+      <div class="field">
+        <label for="itemName">What did you buy</label>
+        <input type="text" id="itemName" placeholder="e.g. New PC build">
+      </div>
+      <div class="field">
+        <label for="itemCost">Total cost ($)</label>
+        <input type="number" id="itemCost" placeholder="1500.00" step="0.01" min="0">
+      </div>
+      <button class="primary" id="saveSetupBtn">Start tracking</button>
+    </div>
+  </div>
+
+  <!-- PROGRESS PANEL -->
+  <div class="panel" id="progressPanel" style="display:none;">
+    <div class="panel-label"><span>PROGRESS</span></div>
+    <div class="progress-row">
+      <div class="progress-pct mono" id="pctDisplay">0%</div>
+      <div class="progress-status mono" id="statusDisplay">IN PROGRESS</div>
+    </div>
+    <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+    <div class="stats-row">
+      <div class="stat">PAID BACK <b class="mono" id="paidStat">$0.00</b></div>
+      <div class="stat">REMAINING <b class="mono" id="remainingStat">$0.00</b></div>
+    </div>
+  </div>
+
+  <!-- ADD ENTRY PANEL -->
+  <div class="panel" id="entryPanel" style="display:none;">
+    <div class="panel-label"><span>LOG A PAYMENT</span></div>
+    <div class="two-col">
+      <div class="field">
+        <label for="entryAmount">Amount ($)</label>
+        <input type="number" id="entryAmount" placeholder="50.00" step="0.01" min="0">
+      </div>
+      <div class="field">
+        <label for="entryDate">Date</label>
+        <input type="date" id="entryDate">
+      </div>
+    </div>
+    <div class="field">
+      <label for="entryNote">Notes (optional)</label>
+      <input type="text" id="entryNote" placeholder="e.g. paid myself back from freelance check">
+    </div>
+    <button class="primary" id="addEntryBtn">Log payment</button>
+  </div>
+
+  <!-- LOG PANEL -->
+  <div class="panel" id="logPanel" style="display:none;">
+    <div class="panel-label"><span>PAYMENT LOG</span></div>
+    <div id="logList"></div>
+  </div>
+
+  <div class="footer-note">STORED LOCALLY IN THIS ARTIFACT — NOT SYNCED ELSEWHERE</div>
+</div>
+
+<script>
+(function(){
+  const SETUP_KEY = 'pc-ledger-setup';
+  const ENTRIES_KEY = 'pc-ledger-entries';
+
+  let setup = null; // {name, cost}
+  let entries = []; // [{id, amount, note, date}]
+
+  const $ = (id) => document.getElementById(id);
+
+  function fmt(n){
+    return '$' + Number(n).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function todayStr(){
+    const d = new Date();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${d.getFullYear()}-${m}-${day}`;
+  }
+
+  function prettyDate(iso){
+    if(!iso) return '';
+    const [y,m,d] = iso.split('-');
+    const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    return `${months[parseInt(m,10)-1]} ${parseInt(d,10)}, ${y}`;
+  }
+
+  async function loadState(){
+    try{
+      const s = await window.storage.get(SETUP_KEY, false);
+      setup = s ? JSON.parse(s.value) : null;
+    }catch(e){ setup = null; }
+    try{
+      const e = await window.storage.get(ENTRIES_KEY, false);
+      entries = e ? JSON.parse(e.value) : [];
+    }catch(e){ entries = []; }
+    render();
+  }
+
+  async function saveSetup(){
+    try{ await window.storage.set(SETUP_KEY, JSON.stringify(setup), false); }
+    catch(e){ console.error('Failed to save setup', e); }
+  }
+
+  async function saveEntries(){
+    try{ await window.storage.set(ENTRIES_KEY, JSON.stringify(entries), false); }
+    catch(e){ console.error('Failed to save entries', e); }
+  }
+
+  function render(){
+    if(setup && setup.name && setup.cost > 0){
+      $('setupForm').style.display = 'none';
+      $('setupDisplay').style.display = 'block';
+      $('editSetupBtn').style.display = 'inline';
+      $('itemNameDisplay').textContent = setup.name;
+      $('itemCostDisplay').textContent = 'Total owed to yourself: ' + fmt(setup.cost);
+      $('progressPanel').style.display = 'block';
+      $('entryPanel').style.display = 'block';
+      $('logPanel').style.display = 'block';
+    } else {
+      $('setupForm').style.display = 'block';
+      $('setupDisplay').style.display = 'none';
+      $('editSetupBtn').style.display = 'none';
+      $('progressPanel').style.display = 'none';
+      $('entryPanel').style.display = 'none';
+      $('logPanel').style.display = 'none';
+      return;
+    }
+
+    const paid = entries.reduce((sum, e) => sum + Number(e.amount), 0);
+    const remaining = Math.max(setup.cost - paid, 0);
+    const pct = Math.min(Math.round((paid / setup.cost) * 100), 100);
+    const isDone = paid >= setup.cost;
+
+    $('pctDisplay').textContent = pct + '%';
+    $('pctDisplay').className = 'progress-pct mono' + (isDone ? ' done' : '');
+    $('statusDisplay').textContent = isDone ? 'PAID IN FULL' : 'IN PROGRESS';
+    $('barFill').style.width = pct + '%';
+    $('barFill').className = 'bar-fill' + (isDone ? ' done' : '');
+    $('paidStat').textContent = fmt(paid);
+    $('remainingStat').textContent = fmt(remaining);
+
+    // log
+    const logList = $('logList');
+    if(entries.length === 0){
+      logList.innerHTML = '<div class="empty-state">No payments logged yet. Add your first one above.</div>';
+    } else {
+      const sorted = [...entries].sort((a,b) => (b.date || '').localeCompare(a.date || '') || b.id - a.id);
+      logList.innerHTML = sorted.map(e => `
+        <div class="log-entry" data-id="${e.id}">
+          <div class="log-marker">$</div>
+          <div class="log-body">
+            <div class="log-top">
+              <div class="log-amount mono">${fmt(e.amount)}</div>
+              <div class="log-date">${prettyDate(e.date)}</div>
+            </div>
+            ${e.note ? `<div class="log-note">${escapeHtml(e.note)}</div>` : ''}
+          </div>
+          <button class="log-del" data-del="${e.id}" aria-label="Delete entry">&times;</button>
+        </div>
+      `).join('');
+    }
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  $('saveSetupBtn').addEventListener('click', async () => {
+    const name = $('itemName').value.trim();
+    const cost = parseFloat($('itemCost').value);
+    if(!name || !cost || cost <= 0){
+      $('itemName').style.borderColor = !name ? 'var(--red)' : 'var(--hair)';
+      $('itemCost').style.borderColor = (!cost || cost<=0) ? 'var(--red)' : 'var(--hair)';
+      return;
+    }
+    setup = {name, cost};
+    await saveSetup();
+    render();
+  });
+
+  $('editSetupBtn').addEventListener('click', () => {
+    $('itemName').value = setup.name;
+    $('itemCost').value = setup.cost;
+    $('setupForm').style.display = 'block';
+    $('setupDisplay').style.display = 'none';
+  });
+
+  $('addEntryBtn').addEventListener('click', async () => {
+    const amount = parseFloat($('entryAmount').value);
+    const note = $('entryNote').value.trim();
+    const date = $('entryDate').value || todayStr();
+    if(!amount || amount <= 0){
+      $('entryAmount').style.borderColor = 'var(--red)';
+      return;
+    }
+    $('entryAmount').style.borderColor = 'var(--hair)';
+    entries.push({id: Date.now(), amount, note, date});
+    await saveEntries();
+    $('entryAmount').value = '';
+    $('entryNote').value = '';
+    $('entryDate').value = '';
+    render();
+  });
+
+  $('logList').addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('[data-del]');
+    if(!btn) return;
+    const id = Number(btn.getAttribute('data-del'));
+    entries = entries.filter(e => e.id !== id);
+    await saveEntries();
+    render();
+  });
+
+  $('entryDate').value = todayStr();
+
+  loadState();
+})();
+</script>
+</body>
+</html>
