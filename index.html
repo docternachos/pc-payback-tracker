@@ -265,7 +265,7 @@
 
   <!-- ACCOUNT BAR (shown once logged in) -->
   <div class="acct-bar hidden" id="acctBar">
-    <div>SIGNED IN AS <b class="mono" id="acctEmail"></b></div>
+    <div>SIGNED IN AS <b class="mono" id="acctUsername"></b></div>
     <button class="link-btn" id="logoutBtn">LOG OUT</button>
   </div>
 
@@ -273,8 +273,8 @@
   <div class="panel" id="authPanel">
     <div class="panel-label"><span id="authTitle">LOG IN</span></div>
     <div class="field">
-      <label for="authEmail">Email</label>
-      <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="username">
+      <label for="authUsername">Username</label>
+      <input type="text" id="authUsername" placeholder="yourname" autocomplete="username" maxlength="32">
     </div>
     <div class="field">
       <label for="authPassword">Password</label>
@@ -384,7 +384,7 @@
 
   // ---------- state ----------
   let mode = 'login'; // 'login' | 'signup'
-  let currentEmail = null;
+  let currentUsername = null;
   let trackers = [];
   let currentTrackerId = null;
 
@@ -407,7 +407,8 @@
     div.textContent = str;
     return div.innerHTML;
   }
-  function normEmail(e){ return e.trim().toLowerCase(); }
+  function normUsername(u){ return u.trim().toLowerCase(); }
+  function isValidUsername(u){ return /^[a-z0-9_.-]{3,32}$/.test(u); }
 
   function toHex(buffer){
     return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -451,26 +452,26 @@
     try{ localStorage.removeItem(LS_PREFIX + key); }catch(e){}
   }
 
-  async function getAccount(email){
-    const raw = lsGet('account:' + email);
+  async function getAccount(username){
+    const raw = lsGet('account:' + username);
     try{ return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
   }
   async function saveAccount(acct){
-    lsSet('account:' + acct.email, JSON.stringify(acct));
+    lsSet('account:' + acct.username, JSON.stringify(acct));
   }
-  async function getTrackers(email){
-    const raw = lsGet('trackers:' + email);
+  async function getTrackers(username){
+    const raw = lsGet('trackers:' + username);
     try{ return raw ? JSON.parse(raw) : []; }catch(e){ return []; }
   }
-  async function saveTrackers(email, list){
-    lsSet('trackers:' + email, JSON.stringify(list));
+  async function saveTrackers(username, list){
+    lsSet('trackers:' + username, JSON.stringify(list));
   }
   async function getSession(){
     const raw = lsGet('session');
-    try{ return raw ? JSON.parse(raw).email : null; }catch(e){ return null; }
+    try{ return raw ? JSON.parse(raw).username : null; }catch(e){ return null; }
   }
-  async function setSession(email){
-    lsSet('session', JSON.stringify({email}));
+  async function setSession(username){
+    lsSet('session', JSON.stringify({username}));
   }
   async function clearSession(){
     lsDelete('session');
@@ -485,7 +486,7 @@
   }
   function showDashboard(){
     $('acctBar').classList.remove('hidden');
-    $('acctEmail').textContent = currentEmail;
+    $('acctUsername').textContent = currentUsername;
     $('authPanel').classList.add('hidden');
     $('dashboardView').classList.remove('hidden');
     $('trackerView').classList.add('hidden');
@@ -517,9 +518,9 @@
 
   $('authSubmitBtn').addEventListener('click', async () => {
     setAuthError('');
-    const email = normEmail($('authEmail').value);
+    const username = normUsername($('authUsername').value);
     const password = $('authPassword').value;
-    if(!email || !email.includes('@')){ setAuthError('Enter a valid email.'); return; }
+    if(!isValidUsername(username)){ setAuthError('Username must be 3–32 characters: letters, numbers, underscores, dots, or hyphens.'); return; }
     if(!password || password.length < 4){ setAuthError('Password must be at least 4 characters.'); return; }
 
     const btn = $('authSubmitBtn');
@@ -528,25 +529,25 @@
     btn.textContent = 'Please wait…';
 
     try{
-      const existing = await getAccount(email);
+      const existing = await getAccount(username);
       if(mode === 'signup'){
-        if(existing){ setAuthError('An account with that email already exists.'); return; }
+        if(existing){ setAuthError('That username is already taken.'); return; }
         const salt = randomSalt();
         const hash = await hashPassword(password, salt);
-        await saveAccount({email, salt, hash});
-        currentEmail = email;
+        await saveAccount({username, salt, hash});
+        currentUsername = username;
         trackers = [];
-        await setSession(email);
+        await setSession(username);
         showDashboard();
       } else {
-        if(!existing){ setAuthError('No account found with that email.'); return; }
+        if(!existing){ setAuthError('No account found with that username.'); return; }
         const hash = await hashPassword(password, existing.salt);
         if(hash !== existing.hash){ setAuthError('Incorrect password.'); return; }
-        currentEmail = email;
-        trackers = await getTrackers(email);
+        currentUsername = username;
+        trackers = await getTrackers(username);
         showDashboard();
       }
-      $('authEmail').value = '';
+      $('authUsername').value = '';
       $('authPassword').value = '';
     } catch(err){
       console.error('Auth failed:', err);
@@ -559,7 +560,7 @@
 
   $('logoutBtn').addEventListener('click', async () => {
     await clearSession();
-    currentEmail = null;
+    currentUsername = null;
     trackers = [];
     currentTrackerId = null;
     mode = 'login';
@@ -605,7 +606,7 @@
     if(delBtn){
       const id = Number(delBtn.getAttribute('data-del'));
       trackers = trackers.filter(t => t.id !== id);
-      await saveTrackers(currentEmail, trackers);
+      await saveTrackers(currentUsername, trackers);
       renderTrackerList();
       return;
     }
@@ -625,7 +626,7 @@
     $('newTrackerError').textContent = '';
     const tracker = {id: Date.now(), name, cost, entries: []};
     trackers.push(tracker);
-    await saveTrackers(currentEmail, trackers);
+    await saveTrackers(currentUsername, trackers);
     $('newTrackerName').value = '';
     $('newTrackerCost').value = '';
     renderTrackerList();
@@ -691,7 +692,7 @@
     if(!name || !cost || cost <= 0) return;
     t.name = name;
     t.cost = cost;
-    await saveTrackers(currentEmail, trackers);
+    await saveTrackers(currentUsername, trackers);
     $('trackerEditForm').classList.add('hidden');
     $('trackerDisplay').classList.remove('hidden');
     renderTracker();
@@ -708,7 +709,7 @@
     }
     $('entryAmount').style.borderColor = 'var(--hair)';
     t.entries.push({id: Date.now(), amount, note, date});
-    await saveTrackers(currentEmail, trackers);
+    await saveTrackers(currentUsername, trackers);
     $('entryAmount').value = '';
     $('entryNote').value = '';
     $('entryDate').value = todayStr();
@@ -721,7 +722,7 @@
     const t = currentTracker();
     const id = Number(btn.getAttribute('data-del'));
     t.entries = t.entries.filter(e => e.id !== id);
-    await saveTrackers(currentEmail, trackers);
+    await saveTrackers(currentUsername, trackers);
     renderTracker();
   });
 
@@ -731,12 +732,12 @@
       $('storageWarning').classList.remove('hidden');
       $('authSubmitBtn').disabled = true;
     }
-    const sessionEmail = await getSession();
-    if(sessionEmail){
-      const acct = await getAccount(sessionEmail);
+    const sessionUsername = await getSession();
+    if(sessionUsername){
+      const acct = await getAccount(sessionUsername);
       if(acct){
-        currentEmail = sessionEmail;
-        trackers = await getTrackers(sessionEmail);
+        currentUsername = sessionUsername;
+        trackers = await getTrackers(sessionUsername);
         showDashboard();
         return;
       }
