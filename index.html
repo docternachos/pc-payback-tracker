@@ -256,6 +256,13 @@
   <h1 class="mono">IOU LEDGER</h1>
   <div class="subtitle">Track what you owe yourself — or anyone else — until it's paid off.</div>
 
+  <div class="panel hidden" id="storageWarning" style="border-color:var(--red);">
+    <div class="panel-label" style="color:var(--red);"><span>STORAGE UNAVAILABLE</span></div>
+    <div style="font-size:13px;color:var(--text-dim);line-height:1.5;">
+      This browser is blocking local storage (common in private/incognito windows or with strict browser settings), so nothing you enter here can be saved. Try a normal browser window, or check your browser's site data settings for this page.
+    </div>
+  </div>
+
   <!-- ACCOUNT BAR (shown once logged in) -->
   <div class="acct-bar hidden" id="acctBar">
     <div>SIGNED IN AS <b class="mono" id="acctEmail"></b></div>
@@ -368,7 +375,7 @@
     </div>
   </div>
 
-  <div class="footer-note">STORED LOCALLY IN THIS ARTIFACT — NOT SYNCED ELSEWHERE</div>
+  <div class="footer-note">STORED IN THIS BROWSER, ON THIS DEVICE — NOT SYNCED ELSEWHERE</div>
 </div>
 
 <script>
@@ -417,36 +424,56 @@
     return toHex(arr.buffer);
   }
 
-  // ---------- storage ----------
-  async function getAccount(email){
+  // ---------- storage (browser localStorage, namespaced) ----------
+  const LS_PREFIX = 'iou-ledger:';
+  const storageAvailable = (function(){
     try{
-      const r = await window.storage.get('account:' + email, false);
-      return r ? JSON.parse(r.value) : null;
+      const testKey = LS_PREFIX + '__test__';
+      localStorage.setItem(testKey, '1');
+      localStorage.removeItem(testKey);
+      return true;
+    }catch(e){ return false; }
+  })();
+
+  function lsGet(key){
+    if(!storageAvailable) return null;
+    try{
+      const raw = localStorage.getItem(LS_PREFIX + key);
+      return raw === null ? null : raw;
     }catch(e){ return null; }
+  }
+  function lsSet(key, value){
+    if(!storageAvailable) throw new Error('localStorage is not available in this browser context.');
+    localStorage.setItem(LS_PREFIX + key, value);
+  }
+  function lsDelete(key){
+    if(!storageAvailable) return;
+    try{ localStorage.removeItem(LS_PREFIX + key); }catch(e){}
+  }
+
+  async function getAccount(email){
+    const raw = lsGet('account:' + email);
+    try{ return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
   }
   async function saveAccount(acct){
-    await window.storage.set('account:' + acct.email, JSON.stringify(acct), false);
+    lsSet('account:' + acct.email, JSON.stringify(acct));
   }
   async function getTrackers(email){
-    try{
-      const r = await window.storage.get('trackers:' + email, false);
-      return r ? JSON.parse(r.value) : [];
-    }catch(e){ return []; }
+    const raw = lsGet('trackers:' + email);
+    try{ return raw ? JSON.parse(raw) : []; }catch(e){ return []; }
   }
   async function saveTrackers(email, list){
-    await window.storage.set('trackers:' + email, JSON.stringify(list), false);
+    lsSet('trackers:' + email, JSON.stringify(list));
   }
   async function getSession(){
-    try{
-      const r = await window.storage.get('session', false);
-      return r ? JSON.parse(r.value).email : null;
-    }catch(e){ return null; }
+    const raw = lsGet('session');
+    try{ return raw ? JSON.parse(raw).email : null; }catch(e){ return null; }
   }
   async function setSession(email){
-    await window.storage.set('session', JSON.stringify({email}), false);
+    lsSet('session', JSON.stringify({email}));
   }
   async function clearSession(){
-    try{ await window.storage.delete('session', false); }catch(e){}
+    lsDelete('session');
   }
 
   // ---------- view switching ----------
@@ -700,6 +727,10 @@
 
   // ---------- init ----------
   (async function init(){
+    if(!storageAvailable){
+      $('storageWarning').classList.remove('hidden');
+      $('authSubmitBtn').disabled = true;
+    }
     const sessionEmail = await getSession();
     if(sessionEmail){
       const acct = await getAccount(sessionEmail);
