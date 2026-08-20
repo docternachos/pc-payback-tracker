@@ -276,7 +276,7 @@
     <div class="error-msg" id="authError"></div>
     <button class="primary" id="authSubmitBtn">Log in</button>
     <div class="auth-toggle" id="authToggleWrap">
-      No account yet? <button id="authToggleBtn">Create one</button>
+      <span id="authToggleQuestion">No account yet?</span> <button id="authToggleBtn" type="button">Create one</button>
     </div>
   </div>
 
@@ -483,10 +483,8 @@
     mode = mode === 'login' ? 'signup' : 'login';
     $('authTitle').textContent = mode === 'login' ? 'LOG IN' : 'CREATE ACCOUNT';
     $('authSubmitBtn').textContent = mode === 'login' ? 'Log in' : 'Create account';
-    $('authToggleWrap').innerHTML = mode === 'login'
-      ? `No account yet? <button id="authToggleBtn2">Create one</button>`
-      : `Already have an account? <button id="authToggleBtn2">Log in</button>`;
-    document.getElementById('authToggleBtn2').addEventListener('click', () => $('authToggleBtn').click());
+    $('authToggleQuestion').textContent = mode === 'login' ? 'No account yet?' : 'Already have an account?';
+    $('authToggleBtn').textContent = mode === 'login' ? 'Create one' : 'Log in';
     setAuthError('');
   });
 
@@ -497,26 +495,39 @@
     if(!email || !email.includes('@')){ setAuthError('Enter a valid email.'); return; }
     if(!password || password.length < 4){ setAuthError('Password must be at least 4 characters.'); return; }
 
-    const existing = await getAccount(email);
-    if(mode === 'signup'){
-      if(existing){ setAuthError('An account with that email already exists.'); return; }
-      const salt = randomSalt();
-      const hash = await hashPassword(password, salt);
-      await saveAccount({email, salt, hash});
-      currentEmail = email;
-      trackers = [];
-      await setSession(email);
-      showDashboard();
-    } else {
-      if(!existing){ setAuthError('No account found with that email.'); return; }
-      const hash = await hashPassword(password, existing.salt);
-      if(hash !== existing.hash){ setAuthError('Incorrect password.'); return; }
-      currentEmail = email;
-      trackers = await getTrackers(email);
-      showDashboard();
+    const btn = $('authSubmitBtn');
+    const originalLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Please wait…';
+
+    try{
+      const existing = await getAccount(email);
+      if(mode === 'signup'){
+        if(existing){ setAuthError('An account with that email already exists.'); return; }
+        const salt = randomSalt();
+        const hash = await hashPassword(password, salt);
+        await saveAccount({email, salt, hash});
+        currentEmail = email;
+        trackers = [];
+        await setSession(email);
+        showDashboard();
+      } else {
+        if(!existing){ setAuthError('No account found with that email.'); return; }
+        const hash = await hashPassword(password, existing.salt);
+        if(hash !== existing.hash){ setAuthError('Incorrect password.'); return; }
+        currentEmail = email;
+        trackers = await getTrackers(email);
+        showDashboard();
+      }
+      $('authEmail').value = '';
+      $('authPassword').value = '';
+    } catch(err){
+      console.error('Auth failed:', err);
+      setAuthError('Something went wrong saving your account. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalLabel;
     }
-    $('authEmail').value = '';
-    $('authPassword').value = '';
   });
 
   $('logoutBtn').addEventListener('click', async () => {
@@ -524,6 +535,12 @@
     currentEmail = null;
     trackers = [];
     currentTrackerId = null;
+    mode = 'login';
+    $('authTitle').textContent = 'LOG IN';
+    $('authSubmitBtn').textContent = 'Log in';
+    $('authToggleQuestion').textContent = 'No account yet?';
+    $('authToggleBtn').textContent = 'Create one';
+    setAuthError('');
     showAuth();
   });
 
